@@ -6,7 +6,7 @@
   <title>Thinklator ‑ மாத வட்டி கணிப்பான்</title>
 
   <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com/3.3.3"></script> <!-- Updated Tailwind CSS version -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Pacifico&family=Mukta+Malar:wght@400;600;700&display=swap" rel="stylesheet">
@@ -41,6 +41,7 @@
     }
 
      /* New keyframes for download button hover effect */
+     /* Note: Download button CSS below redefines background, but animation keys are here */
     @keyframes shimmer-effect-download {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
@@ -99,7 +100,7 @@
     #receiptContainerWrapper {
         /* Styles for the container holding the receipt and print button */
         /* Initially hidden */
-        display: none; /* Start hidden */
+        display: none; /* Changed from 'none !important' for JS flexibility */
         flex-direction: column;
         align-items: center;
         padding: 20px;
@@ -119,26 +120,30 @@
         overflow: hidden;
     }
 
-    .green-section-bg {
-         background-color: #bbf7d1;
-         padding: 10px 20px;
-         margin: 0 -20px; /* Extend background to edge of receipt-container */
-         /* Apply border radius only to top sections for the top green part */
-         /* Bottom green part should have bottom radii */
-         border-radius: 0; /* Reset default */
-    }
-
-     /* Specific border radius for the top green section */
+    /* Specific border radius for the top green section */
      .receipt-container > .green-section-bg:first-child {
          border-top-left-radius: 10px;
          border-top-right-radius: 10px;
+         border-bottom-left-radius: 0; /* Ensure bottom is square */
+         border-bottom-right-radius: 0; /* Ensure bottom is square */
      }
 
      /* Specific border radius for the bottom green section */
       .receipt-container > .green-section-bg:last-child {
+         border-top-left-radius: 0; /* Ensure top is square */
+         border-top-right-radius: 0; /* Ensure top is square */
          border-bottom-left-radius: 10px;
          border-bottom-right-radius: 10px;
      }
+
+     /* Reapply green background style */
+    .green-section-bg {
+         background-color: #bbf7d1;
+         padding: 10px 20px;
+         margin: 0 -20px; /* Extend background to edge of receipt-container */
+         /* Remove border radius from here to apply specifically to first/last children */
+         border-radius: 0;
+    }
 
 
     .receipt-header {
@@ -256,7 +261,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: #4CAF50; /* Base green background */
+        /* Base green background, keep original for non-hover */
+        background-color: #4CAF50;
         color: white;
         padding: 10px 20px;
         border: none;
@@ -273,7 +279,8 @@
     .download-button:hover,
     .download-button:active {
         animation: shimmer-effect-download 1.5s linear infinite; /* Apply animation on hover/active */
-        background: linear-gradient(90deg, #bbf7d1, #4ade80, #bbf7d1); /* Use the gradient from the original shimmer */
+        /* Use the gradient from the original shimmer */
+        background: linear-gradient(90deg, #bbf7d1, #4ade80, #bbf7d1);
         background-size: 200% 100%;
         color: #fff; /* Ensure text stays white during animation */
     }
@@ -284,7 +291,7 @@
         animation: none;
         background-position: 0% 0;
         /* Base background-color should be defined */
-        background-color: #4CAF50;
+        background-color: #4CAF50; /* Explicitly set base color */
     }
 
 
@@ -294,6 +301,62 @@
         font-size: 1em;
     }
 
+    /* Styles for printing */
+    @media print {
+        body {
+            background-color: #fff; /* White background for printing */
+            padding: 0;
+            margin: 0;
+            display: block; /* Override flex for printing */
+            min-height: auto;
+        }
+         /* Hide elements not needed in print */
+        .nav-with-slide, header, main, footer, .download-button {
+            display: none;
+        }
+        #receiptContainerWrapper {
+             /* Ensure the receipt is shown and styled for print */
+             display: block !important; /* Override JS 'none' */
+             padding: 0;
+             margin: 0 auto; /* Center the receipt */
+             max-width: 400px; /* Keep max width */
+        }
+        .receipt-container {
+            box-shadow: none; /* No shadow on print */
+            border: none; /* No border on print */
+            border-radius: 0;
+            max-width: 100%; /* Use full width available within wrapper */
+            width: auto;
+            margin: 0; /* Remove margins */
+            padding: 0 10mm; /* Use physical units for print horizontal padding */
+        }
+         .green-section-bg {
+             padding: 5mm 10mm; /* Use physical units for print padding */
+             margin: 0 -10mm; /* Adjust negative margin for print padding */
+             /* Remove border radius on print */
+              border-radius: 0 !important;
+         }
+         .dashed-separator { /* Adjust print margin for the dashed separator */
+             margin: 5mm auto; /* Adjust margin for print */
+         }
+          /* Adjusted section/title/row padding/margins for print readability */
+         .section {
+             padding-top: 5mm;
+             margin-bottom: 10mm;
+         }
+          .section-title {
+             padding-bottom: 2mm;
+             margin-bottom: 5mm;
+          }
+          .detail-row {
+             margin-bottom: 3mm;
+          }
+           .final-amount-row-item {
+              padding-top: 5mm;
+              padding-bottom: 2mm;
+           }
+    }
+    /* --- CSS Styles End --- */
   </style>
 </head>
 
@@ -343,15 +406,12 @@
         கணக்கிடு
       </button>
 
-      <!-- Results (Original - Numbers and Tamil Words) -->
-      <!-- This section will be populated by JavaScript -->
-      <div id="resultSection" class="mt-6 space-y-6">
-           <!-- Content will be inserted here by calculate() -->
-      </div>
+      <!-- Results (Original) -->
+      <div id="resultSection" class="mt-6 space-y-6"></div>
     </div>
   </main>
 
-  <!-- Receipt Section (Initially Hidden) - This is the new primary output -->
+  <!-- Receipt Section (Initially Hidden) -->
   <div id="receiptContainerWrapper" class="mt-8 flex flex-col items-center">
     <div class="receipt-container">
 
@@ -437,13 +497,14 @@
   </footer>
 
   <!-- html2pdf.js library (includes html2canvas and jsPDF) -->
+  <!-- Make sure ONLY THIS SCRIPT IS LOADED for PDF generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
 
   <!-- JavaScript -->
   <script>
+    // Tamil number conversion functions
     const U = ["","ஒன்று","இரண்டு","மூன்று","நான்கு","ஐந்து","ஆறு","ஏழு","எட்டு","ஒன்பது"];
-    const T = ["","பத்து","இருபது","முப்பது","நாப்பது","ஐம்பது","அறுபது","எழுபது","எண்பது","தொண்ணூறு"];
+    const T = ["","பத்து","இருபது","முப்பது","நாற்பது","ஐம்பது","அறுபது","எழுபது","எண்பது","தொண்ணூறு"]; /* Corrected நாப்பது to நாற்பது */
 
     function bH(n){
       if(n < 10) return U[n];
@@ -455,15 +516,16 @@
 
     function bT(n){
       const h = Math.floor(n / 100), r = n % 100;
-      return (h ? `${U[h]} நூறு${r ? " " : ""}` : "") + (r ? bH(r) : "");
+      if (h === 1 && r === 0) return "நூறு"; // Handle exactly 100
+      return (h ? `${U[h]}${h > 1 ? " " : ""}நூறு${r ? " " : ""}` : "") + (r ? bH(r) : "");
     }
 
-    function taWords(num){
+     function taWords(num){
       if (isNaN(num)) return "தவறான பதிவு";
       if (num < 0) return "பூஜ்யத்திற்கும் குறைவானது";
       if (num === 0) return "பூஜ்யம்";
 
-      // Round to 2 decimal places for currency
+      // Round to 2 decimal places for currency and handle as integer/decimal parts
       const numStr = num.toFixed(2);
       const [integerPart, decimalPart] = numStr.split('.');
       const intNum = parseInt(integerPart, 10);
@@ -472,50 +534,66 @@
       const c = Math.floor(intNum / 1e7);
       const l = Math.floor((intNum % 1e7) / 1e5);
       const th = Math.floor((intNum % 1e5) / 1e3);
-      const r = intNum % 1e3;
+      const r = intNum % 1e3; // Remainder less than 1000
       const arr = [];
 
       if (c) arr.push(`${bT(c)} கோடி`);
       if (l) arr.push(`${bT(l)} லட்சம்`);
       if (th) arr.push(`${bT(th)} ஆயிரம்`);
-      if (r) arr.push(bT(r));
+      if (r) {
+           // Use bT for the remainder part (0-999)
+           if (r === 0 && intNum > 0 && arr.length > 0) {
+               // If remainder is 0 and there was a larger unit, don't add anything here
+           } else {
+                arr.push(bT(r));
+           }
+      }
 
       let result = arr.join(" ");
-       if (result && intNum > 0) result += " ரூபாய்"; // Add "ரூபாய்" only if there's an integer part > 0
+       if (intNum > 0) { // Add "ரூபாய்" only if there is a non-zero integer part
+           if (result) result += " ரூபாய்";
+           else result = "ரூபாய்"; // Case where intNum < 1000 but is > 0
+       } else if (intNum === 0 && decNum > 0) {
+            // If only paisa, result starts empty, don't add " ரூபாய்"
+       }
 
       if (decNum > 0) {
-          const paisaText = bH(decNum);
+          const paisaText = bH(decNum); // Use bH for numbers up to 99 (for paisa)
           if (result && intNum > 0) { // If there was a Rupee part
               result += ` மற்றும் ${paisaText} பைசா`;
           } else if (intNum === 0) { // If only paisa (e.g., 0.50)
               result = `${paisaText} பைசா`;
-          } else { // Handle cases like 100.50 - "நூறு ரூபாய் மற்றும் ஐம்பது பைசா"
-             result += ` மற்றும் ${paisaText} பைசா`;
+          } else { // This case should be covered by the intNum > 0 check above
+               result += ` மற்றும் ${paisaText} பைசா`;
           }
       } else if (intNum > 0 && decNum === 0) {
-           // If it's an integer amount like 100.00, ensure "ரூபாய்" is added
-           if (!result.includes(" ரூபாய்")) {
-               result += " ரூபாய்";
-           }
+           // Ensure "ரூபாய்" is added even if decimal part is 0, if int part is > 0
+            if (!result.includes(" ரூபாய்")) {
+               // This case is mostly handled above, but as a fallback:
+               if (result) result += " ரூபாய்";
+               else result = "ரூபாய்";
+            }
        }
 
-
-        // Ensure 0.00 is "பூஜ்யம்" if the integer part is 0 and decimal part is 0
+        // Handle edge case for exactly 0.00
         if (intNum === 0 && decNum === 0) {
             result = "பூஜ்யம்";
         }
 
+       // Clean up potential extra space before "ரூபாய்" or "பைசா"
+       result = result.replace(/\s+ரூபாய்/, " ரூபாய்").replace(/\s+மற்றும்/, " மற்றும்").trim();
 
-      return result.trim(); // Trim any leading/trailing space
+      return result || "பூஜ்யம்"; // Return "பூஜ்யம்" if result is empty (e.g., 0.00)
     }
 
 
+    // Get element references
     const amountInput = document.getElementById('amount');
     const rateInput = document.getElementById('rate');
     const monthsInput = document.getElementById('months');
-    const resultSection = document.getElementById('resultSection'); // Original results section
-    const receiptContainerWrapper = document.getElementById('receiptContainerWrapper'); // Receipt section wrapper
-    const receiptContainer = document.querySelector('.receipt-container'); // Receipt container
+    const resultSection = document.getElementById('resultSection');
+    const receiptContainerWrapper = document.getElementById('receiptContainerWrapper');
+    const receiptContainer = document.querySelector('.receipt-container');
 
     // Get receipt element references
     const receiptDateTime = document.getElementById('receiptDateTime');
@@ -537,9 +615,9 @@
       // Basic validation
       if (isNaN(amount) || amount < 0 || isNaN(rate) || rate < 0 || isNaN(months) || months <= 0) {
           alert("தயவு செய்து சரியான எண் மதிப்புகளை உள்ளிடவும்!");
-          // Hide/clear both output sections if inputs are invalid
-          resultSection.innerHTML = ''; // Clear original results div
-          receiptContainerWrapper.style.display = 'none'; // Hide receipt section
+          // Hide results and receipt if inputs are invalid
+          resultSection.innerHTML = '';
+          receiptContainerWrapper.style.display = 'none';
           return;
       }
 
@@ -559,7 +637,7 @@
         { label: "மொத்த தொகை", value: total }
       ];
 
-      // --- Update Original Results Section (Numbers and Tamil Words) ---
+      // --- Update Original Results Section ---
       const numberSection = items.map(item => `
         <div class="flex justify-between border-b border-green-300 pb-1">
           <span>${item.label}:</span>
@@ -579,15 +657,107 @@
           <div class="text-xl font-bold text-center mb-1 border-b border-green-500 pb-1">எண்கள்</div>
           ${numberSection}
         </div>
-        <div id="tamilOutputBox" class="bg-green-200 p-4 rounded-xl text-green-900 shadow space-y-3 border border-green-400">
+        <div class="bg-green-200 p-4 rounded-xl text-green-900 shadow space-y-3 border border-green-400">
           <div class="text-xl font-bold text-center mb-1 border-b border-green-500 pb-1">தமிழில்</div>
           ${tamilSection}
         </div>
       `;
-       // Ensure the resultSection itself is visible (though populating innerHTML usually does this)
-       // resultSection.style.display = 'block'; // Not strictly necessary due to Tailwind defaults and innerHTML
-
 
       // --- Update Receipt Section ---
       const now = new Date();
-      // Format date and time for th
+      // Format date and time for the receipt (e.g., "2024-05-18 அன்று 11:42 PM")
+      const dateTimeString = now.toLocaleDateString('en-CA') + ' அன்று ' +
+                             now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); /* Added hour12: true */
+      receiptDateTime.textContent = dateTimeString;
+
+      receiptAmountValue.textContent = `₹${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      receiptRateValue.textContent = `${rate}%`;
+      receiptMonthsValue.textContent = `${months} மாதங்கள்`;
+      receiptMonthlyInterestValue.textContent = `₹${mi.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      receiptTotalInterestValue.textContent = `₹${ti.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      receiptTotalAmountValue.textContent = `₹${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      // Show the receipt section wrapper
+      receiptContainerWrapper.style.display = 'flex'; /* Used 'flex' as per CSS */
+    }
+
+    // --- Event Listener to Hide Outputs on Input Change ---
+    function hideOutputOnInput() {
+        resultSection.innerHTML = ''; // Clear original results div
+        receiptContainerWrapper.style.display = 'none'; // Hide receipt section wrapper
+    }
+
+    amountInput.addEventListener('input', hideOutputOnInput);
+    rateInput.addEventListener('input', hideOutputOnInput);
+    monthsInput.addEventListener('input', hideOutputOnInput);
+
+
+    // --- PDF Download Button Logic using html2pdf.js ---
+    downloadPdfBtn.addEventListener('click', function() {
+        console.log("Download button clicked.");
+
+        // Check if html2pdf is loaded
+        if (typeof html2pdf === 'undefined') {
+            console.error("html2pdf.js library is not loaded.");
+            alert("PDF உருவாக்க தேவையான லைப்ரரி லோட் ஆகவில்லை. இணைய இணைப்பை சரிபார்த்து மீண்டும் முயற்சிக்கவும்.");
+            return;
+        }
+
+        // Ensure the receipt container element is available
+        if (!receiptContainer) {
+            console.error("Receipt container element not found.");
+            alert("ரசீது உள்ளடக்கத்தை கண்டுபிடிக்க முடியவில்லை.");
+            return;
+        }
+
+        // Temporarily remove box-shadow and border for better rendering in canvas
+        // Store original styles to restore later
+        const originalBoxShadow = receiptContainer.style.boxShadow;
+        const originalBorder = receiptContainer.style.border;
+        receiptContainer.style.boxShadow = 'none';
+        receiptContainer.style.border = 'none';
+
+        console.log("Attempting PDF generation...");
+
+        // Configuration for html2pdf
+        const options = {
+            margin: 10, // 10mm margin around the content
+            filename: 'Thinklator_Interest_Receipt.pdf', // Safe filename
+            image: { type: 'png', quality: 1.0 }, // Use PNG for potentially better quality
+            html2canvas: { scale: 3, useCORS: true, logging: true }, // useCORS is important for external images
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Use html2pdf to generate and save the PDF
+        // Target only the receipt div
+        html2pdf().from(receiptContainer).set(options).save().then(() => {
+             console.log("PDF generated successfully.");
+        }).catch(error => {
+             console.error("Error generating PDF:", error);
+             // Provide a more detailed error message based on potential issues
+             let errorMessage = "PDF உருவாக்க முடியவில்லை.";
+             if (error && (error.message && error.message.includes("Failed to fetch") || (error.name && error.name === "NetworkError"))) {
+                 errorMessage += " இணைப்பிலோ அல்லது படங்களை லோட் செய்வதிலோ சிக்கல் இருக்கலாம். லோகோ படத்தை உங்கள் GitHub ரெப்போவில் நேரடியாக ஹோஸ்ட் செய்து முயற்சிக்கவும்."; // Added suggestion
+             } else if (error && error.message && error.message.includes("html2canvas")) {
+                  errorMessage += " ரசீதின் வடிவமைப்பை (CSS) ரெண்டர் செய்வதில் சிக்கல் இருக்கலாம்.";
+             } else {
+                  errorMessage += " கன்சோலில் உள்ள பிழைகளை சரிபார்க்கவும்.";
+             }
+             alert(errorMessage);
+
+        }).finally(() => {
+             // Always restore box-shadow and border after generation attempt
+             receiptContainer.style.boxShadow = originalBoxShadow;
+             receiptContainer.style.border = originalBorder;
+        });
+    });
+
+    // Initial state: Hide/Clear outputs on page load
+    document.addEventListener('DOMContentLoaded', function() {
+       receiptContainerWrapper.style.display = 'none'; // Hide receipt section
+       resultSection.innerHTML = ''; // Ensure the original results div is empty on load
+    });
+
+  </script>
+</body>
+</html>
