@@ -437,7 +437,6 @@
   </footer>
 
   <!-- html2pdf.js library (includes html2canvas and jsPDF) -->
-  <!-- Ensure this script loads correctly -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 
@@ -544,6 +543,10 @@
           return;
       }
 
+      // Clear previous results before calculating and showing new ones
+      resultSection.innerHTML = '';
+      receiptContainerWrapper.style.display = 'none';
+
 
       const mi = (amount * rate) / 100; // Monthly Interest
       const ti = mi * months; // Total Interest
@@ -571,7 +574,6 @@
         </div>
       `).join("");
 
-      // Corrected IDs for number and tamil output boxes
       resultSection.innerHTML = `
         <div id="numberOutputBox" class="bg-green-200 p-4 rounded-xl text-green-900 shadow space-y-3 border border-green-400">
           <div class="text-xl font-bold text-center mb-1 border-b border-green-500 pb-1">எண்கள்</div>
@@ -582,10 +584,10 @@
           ${tamilSection}
         </div>
       `;
-       // Ensure the resultSection itself is visible if it wasn't already (Tailwind flex/block usually handles this)
+       // Ensure the resultSection itself is visible (though populating innerHTML usually does this)
        // resultSection.style.display = 'block'; // Not strictly necessary due to Tailwind defaults and innerHTML
+
 
       // --- Update Receipt Section ---
       const now = new Date();
-      // Format date and time for the receipt (e.g., "YYYY-MM-DD HH:MM")
-      //
+      // Format date and time for th
